@@ -1,0 +1,5 @@
+flask == 2.2.2
+flask-smorest == 0.40.0
+flask-sqlalchemy == 3.0.3
+python-dotenv == 0.21.1
+marshmallow == 3.19.0
