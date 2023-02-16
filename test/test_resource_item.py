@@ -4,7 +4,6 @@ from api.app import create_app
 from api.db import db
 from api.models import ItemModel
 from api.schemas import ItemSchema
-from sqlalchemy.exc import NoResultFound
 
 @pytest.fixture(scope="module")
 def app_fixture():

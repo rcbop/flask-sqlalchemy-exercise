@@ -12,3 +12,4 @@ class ItemModel(db.Model):
         db.Integer, db.ForeignKey("stores.id"), unique=False, nullable=False
     )
     store = db.relationship("StoreModel", back_populates="items")
+    tags = db.relationship("TagModel", secondary="item_tags", back_populates="items")

@@ -23,6 +23,37 @@ def db_fixture(app_fixture):
         yield db
         db.drop_all()
 
+
+def test_get_tag_without_store(test_client, db_fixture):
+    # add a store to the database
+    store = StoreModel(name="Test Store")
+    db_fixture.session.add(store)
+    db_fixture.session.commit()
+
+    # create a new tag to add to the store
+    new_tag = {"name": "New Tag"}
+
+    tag = TagModel(**new_tag, store_id=store.id)
+    db_fixture.session.add(tag)
+    db_fixture.session.commit()
+
+    response = test_client.get("/tag/1")
+    assert response.status_code == 200
+    assert response.json["name"] == "New Tag"
+
+def test_get_tag_without_store_not_found(test_client):
+    response = test_client.get("/tag/99")
+    assert response.status_code == 404
+
+def test_delete_tag_without_store(test_client):
+    response = test_client.delete("/tag/1")
+    assert response.status_code == 202
+
+def test_delete_tag_without_store_not_found(test_client):
+    response = test_client.delete("/tag/99")
+    assert response.status_code == 404
+
+
 def test_get_tags_in_store(test_client, db_fixture):
     # add a store and some tags to it
     store = StoreModel(name="Test Store 1")

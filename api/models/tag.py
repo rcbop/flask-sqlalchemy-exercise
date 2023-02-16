@@ -7,3 +7,4 @@ class TagModel(db.Model):
     name = db.Column(db.String(80))
     store_id = db.Column(db.Integer, db.ForeignKey('stores.id'), nullable=False)
     store = db.relationship('StoreModel', back_populates='tags')
+    items = db.relationship('ItemModel', secondary='item_tags', back_populates='tags')
