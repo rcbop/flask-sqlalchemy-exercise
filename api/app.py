@@ -5,6 +5,7 @@ from api.db import db
 
 from api.resources.item import blp as ItemBlueprint
 from api.resources.store import blp as StoreBlueprint
+from api.resources.tag import blp as TagBlueprint
 
 def create_app(db_url: str | None = None) -> Api:
     app = Flask(__name__)
@@ -27,4 +28,5 @@ def create_app(db_url: str | None = None) -> Api:
 
     api.register_blueprint(ItemBlueprint)
     api.register_blueprint(StoreBlueprint)
+    api.register_blueprint(TagBlueprint)
     return app
