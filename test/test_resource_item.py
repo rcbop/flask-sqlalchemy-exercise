@@ -49,7 +49,7 @@ def test_delete_item(test_client, db_session):
     response = test_client.delete(f'/item/{item.id}')
 
     # assert the response code and message
-    assert response.status_code == 200
+    assert response.status_code == 202
     assert response.json == {"message": "Item deleted."}
 
     # check that the item no longer exists in the database

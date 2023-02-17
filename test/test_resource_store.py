@@ -41,7 +41,7 @@ def test_delete_store(test_client, db_fixture):
     db_fixture.session.commit()
 
     response = test_client.delete(f'/store/{store.id}')
-    assert response.status_code == 200
+    assert response.status_code == 202
     assert response.json == {"message": "Store deleted"}
 
 def test_delete_store_not_found(test_client, db_fixture):
@@ -72,4 +72,4 @@ def test_post_store_duplicate_name(test_client, db_fixture):
 
     store_data = {'name': 'Test Store'}
     response = test_client.post('/store', json=store_data)
-    assert response.status_code == 400
+    assert response.status_code == 409

@@ -11,6 +11,7 @@ blp = Blueprint('Tags', 'tags', description='Operations on tags')
 @blp.route("/stores/<int:store_id>/tag")
 class TagsInStore(MethodView):
     @blp.response(200, TagSchema(many=True))
+    @blp.alt_response(404, description="Store not found.")
     def get(self, store_id):
         store = db.session.query(StoreModel).filter_by(id=store_id).first()
         if not store:
@@ -19,6 +20,10 @@ class TagsInStore(MethodView):
 
     @blp.arguments(TagSchema)
     @blp.response(201, TagSchema)
+    @blp.alt_response(400, description="Tag name is required.")
+    @blp.alt_response(404, description="Store not found.")
+    @blp.alt_response(409, description="Tag with name already exists in that store.")
+    @blp.alt_response(500, description="Database error.")
     def post(self, new_tag, store_id):
         try:
             store = db.session.query(StoreModel).filter_by(id=store_id).first()
@@ -39,6 +44,8 @@ class TagsInStore(MethodView):
 @blp.route("/item/<string:item_id>/tag/<string:tag_id>")
 class LinkTagsToItem(MethodView):
     @blp.response(201, TagSchema(many=True))
+    @blp.alt_response(404, description="Item or tag not found.")
+    @blp.alt_response(500, description="Database error.")
     def post(self, item_id, tag_id):
         try:
             item = db.session.query(ItemModel).filter_by(id=item_id).first()
@@ -56,14 +63,16 @@ class LinkTagsToItem(MethodView):
         return item.tags, 201
 
     @blp.response(202, TagAndItemSchema)
+    @blp.alt_response(404, description="Item or tag not found.")
+    @blp.alt_response(500, description="Database error.")
     def delete(self, item_id, tag_id):
         try:
             item = db.session.query(ItemModel).filter_by(id=item_id).first()
             tag = db.session.query(TagModel).filter_by(id=tag_id).first()
             if not item:
-                abort(404, message="Item not found.")
+                abort(404, description="Item not found.")
             if not tag:
-                abort(404, message="Tag not found.")
+                abort(404, description="Tag not found.")
             if tag in item.tags:
                 item.tags.remove(tag)
                 db.session.commit()
@@ -75,6 +84,7 @@ class LinkTagsToItem(MethodView):
 @blp.route("/tag/<string:tag_id>")
 class Tag(MethodView):
     @blp.response(200, TagSchema)
+    @blp.alt_response(404, description="Tag not found.")
     def get(self, tag_id):
         tag = db.session.query(TagModel).filter_by(id=tag_id).first()
         if not tag:
@@ -82,6 +92,8 @@ class Tag(MethodView):
         return tag
 
     @blp.response(202)
+    @blp.alt_response(404, description="Tag not found.")
+    @blp.alt_response(500, description="Database error.")
     def delete(self, tag_id):
         try:
             tag = db.session.query(TagModel).filter_by(id=tag_id).first()
