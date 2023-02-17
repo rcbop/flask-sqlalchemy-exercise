@@ -3,6 +3,7 @@ import os
 from flask import Flask
 from flask_jwt_extended import JWTManager
 from flask_smorest import Api
+import secrets
 
 from api.db import db
 from api.resources.item import blp as ItemBlueprint
@@ -24,7 +25,7 @@ def create_app(db_url: str | None = None, jwt_secret: str | None = None) -> Api:
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url or os.getenv(
         "DATABASE_URL", "sqlite:///data.db")
     app.config["JWT_SECRET_KEY"] = jwt_secret or os.getenv(
-        "JWT_SECRET_KEY", "super-secret")
+        "JWT_SECRET_KEY", secrets.SystemRandom().getrandbits(256))
     db.init_app(app)
 
     with app.app_context():
