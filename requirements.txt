@@ -4,3 +4,4 @@ flask-sqlalchemy == 3.0.3
 python-dotenv == 0.21.1
 marshmallow == 3.19.0
 flask-jwt-extended == 4.4.0
+passlib == 1.7.4

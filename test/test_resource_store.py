@@ -7,6 +7,9 @@ def test_get_store(test_client, db_fixture):
 
     response = test_client.get(f'/store/{store.id}')
     assert response.status_code == 200
+    assert response.json['name'] == "Test Store"
+    db_fixture.session.query(StoreModel).count() == 1
+    db_fixture.session.query(StoreModel).delete()
 
 def test_get_store_not_found(test_client):
     response = test_client.get('/store/99')
@@ -20,6 +23,7 @@ def test_delete_store(test_client, db_fixture):
     response = test_client.delete(f'/store/{store.id}')
     assert response.status_code == 202
     assert response.json == {"message": "Store deleted"}
+    db_fixture.session.query(StoreModel).count() == 0
 
 def test_delete_store_not_found(test_client, db_fixture):
     response = test_client.delete('/store/99')
@@ -36,10 +40,13 @@ def test_get_stores(test_client, db_fixture):
     assert response.status_code == 200
     assert len(response.json) == 2
 
-def test_post_store(test_client):
+def test_post_store(test_client, db_fixture):
     store_data = {'name': 'Test Store'}
     response = test_client.post('/store', json=store_data)
     assert response.status_code == 201
+    assert response.json['name'] == "Test Store"
+    db_fixture.session.query(StoreModel).count() == 1
+    db_fixture.session.query(StoreModel).delete()
 
 def test_post_store_duplicate_name(test_client, db_fixture):
     db_fixture.session.query(StoreModel).delete()

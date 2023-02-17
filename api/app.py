@@ -9,7 +9,7 @@ from api.db import db
 from api.resources.item import blp as ItemBlueprint
 from api.resources.store import blp as StoreBlueprint
 from api.resources.tag import blp as TagBlueprint
-
+from api.resources.user import blp as UserBlueprint
 
 def create_app(db_url: str | None = None, jwt_secret: str | None = None) -> Api:
     app = Flask(__name__)
@@ -38,4 +38,5 @@ def create_app(db_url: str | None = None, jwt_secret: str | None = None) -> Api:
     api.register_blueprint(ItemBlueprint)
     api.register_blueprint(StoreBlueprint)
     api.register_blueprint(TagBlueprint)
+    api.register_blueprint(UserBlueprint)
     return app
