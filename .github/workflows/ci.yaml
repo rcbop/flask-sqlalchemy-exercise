@@ -25,7 +25,20 @@ jobs:
           python -m pip install -r requirements-dev.txt
       - name: Build coverage file
         run: |
-          pytest --cov=api
+          pytest --cov=api --cov-report=xml --cov-report=term --junitxml=junit.xml
+      - name: Archive test results
+        uses: actions/upload-artifact@v3
+        with:
+          path: junit.xml
+      - name: Report coverage
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml
+          env_vars: OS,PYTHON
+          fail_ci_if_error: false
+          verbose: true
+
   sast:
     runs-on: ubuntu-latest
     steps:

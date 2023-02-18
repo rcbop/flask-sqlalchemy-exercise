@@ -1,6 +1,6 @@
 # flask sqlalchemy exercise
 
-[![Continuous Integration](https://github.com/rcbop/flask-sqlalchemy-exercise/actions/workflows/ci.yaml/badge.svg)](https://github.com/rcbop/flask-sqlalchemy-exercise/actions/workflows/ci.yaml)
+[![Continuous Integration](https://github.com/rcbop/flask-sqlalchemy-exercise/actions/workflows/ci.yaml/badge.svg)](https://github.com/rcbop/flask-sqlalchemy-exercise/actions/workflows/ci.yaml)&nbsp;&nbsp;[![codecov](https://codecov.io/gh/rcbop/flask-sqlalchemy-exercise/branch/main/graph/badge.svg?token=BYRZNXLVCY)](https://codecov.io/gh/rcbop/flask-sqlalchemy-exercise)
 
 ## Recommended environment:
 
