@@ -1,6 +1,7 @@
 from flask.views import MethodView
+from flask_jwt_extended import get_jwt, jwt_required
 from flask_smorest import Blueprint, abort
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from api.db import db
 from api.models import ItemModel
@@ -13,6 +14,7 @@ blp = Blueprint("Items", "items", description="Operations on items")
 class Item(MethodView):
     @blp.response(200, ItemSchema)
     @blp.alt_response(404, description="Item not found.")
+    @jwt_required()
     def get(self, item_id):
         item = ItemModel.query.filter_by(id=item_id).first()
         if item is None:
@@ -22,6 +24,7 @@ class Item(MethodView):
     @blp.response(202)
     @blp.alt_response(404, description="Item not found.")
     @blp.alt_response(500, description="An error occurred deleting the item.")
+    @jwt_required()
     def delete(self, item_id):
         try:
             item = ItemModel.query.filter_by(id=item_id).first()
@@ -36,6 +39,7 @@ class Item(MethodView):
     @blp.arguments(ItemUpdateSchema)
     @blp.response(200, ItemSchema)
     @blp.alt_response(400, description="Item must have a name and a price.")
+    @jwt_required()
     def put(self, item_data, item_id):
         if "name" not in item_data:
             abort(400, message="Item must have a name.")
@@ -59,6 +63,7 @@ class Item(MethodView):
 @blp.route("/item")
 class ItemList(MethodView):
     @blp.response(200, ItemSchema(many=True))
+    @jwt_required()
     def get(self):
         return ItemModel.query.all()
 
@@ -67,6 +72,7 @@ class ItemList(MethodView):
     @blp.alt_response(500, description="An error occurred while inserting the item.")
     @blp.alt_response(400, description="Item must have a name and a price.")
     @blp.alt_response(409, description="An item with that name already exists.")
+    @jwt_required(fresh=True)
     def post(self, item_data):
         if "name" not in item_data or "price" not in item_data:
             abort(400, message="Item must have a name and a price.")

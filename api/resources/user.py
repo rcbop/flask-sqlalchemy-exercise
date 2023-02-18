@@ -1,9 +1,12 @@
 from collections import namedtuple
 
 from flask.views import MethodView
+from flask_jwt_extended import (create_access_token, create_refresh_token,
+                                get_jwt, get_jwt_identity, jwt_required)
 from flask_smorest import Blueprint, abort
 from passlib.hash import pbkdf2_sha256
 
+from api.auth.blocklist import BLOCKLIST
 from api.db import db
 from api.models import UserModel
 from api.schemas import UserSchema
@@ -36,6 +39,7 @@ class UserRegister(MethodView):
         db.session.commit()
         return {"message": "User registered!"}, 201
 
+
 @blp.route("/user/<int:user_id>")
 class User(MethodView):
     @blp.response(200, UserSchema)
@@ -48,6 +52,7 @@ class User(MethodView):
 
     @blp.response(202)
     @blp.alt_response(404, description="User not found")
+    @jwt_required()
     def delete(self, user_id):
         user = UserModel.query.filter_by(id=user_id).first()
         if not user:
@@ -55,3 +60,38 @@ class User(MethodView):
         db.session.delete(user)
         db.session.commit()
         return {"message": "User deleted!"}, 202
+
+@blp.route("/login")
+class UserLogin(MethodView):
+    @blp.arguments(UserSchema)
+    def post(self, user_data):
+        user = UserModel.query.filter_by(
+            username=user_data["username"]
+        ).first()
+
+        if user and pbkdf2_sha256.verify(user_data["password"], user.password):
+            access_token = create_access_token(identity=user.id, fresh=True)
+            refresh_token = create_refresh_token(user.id)
+            return {
+                "access_token": access_token,
+                "refresh_token": refresh_token
+            }, 200
+        return {"message": "Invalid credentials"}, 401
+
+@blp.route("/logout")
+class UserLogout(MethodView):
+    @jwt_required()
+    def post(self):
+        jti = get_jwt()["jti"]
+        BLOCKLIST.add(jti)
+        return {"message": "Successfully logged out"}, 200
+
+@blp.route("/users")
+class TokenRefresh(MethodView):
+    @jwt_required(refresh=True)
+    def post(self):
+        current_user = get_jwt_identity()
+        access_token = create_access_token(identity=current_user, fresh=False)
+        jti = get_jwt()["jti"]
+        BLOCKLIST.add(jti)
+        return {"access_token": access_token}, 200

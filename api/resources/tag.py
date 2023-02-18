@@ -1,5 +1,6 @@
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
+from flask_jwt_extended import get_jwt, jwt_required
 from sqlalchemy.exc import SQLAlchemyError
 
 from api.db import db
@@ -12,6 +13,7 @@ blp = Blueprint('Tags', 'tags', description='Operations on tags')
 class TagsInStore(MethodView):
     @blp.response(200, TagSchema(many=True))
     @blp.alt_response(404, description="Store not found.")
+    @jwt_required()
     def get(self, store_id):
         store = db.session.query(StoreModel).filter_by(id=store_id).first()
         if not store:
@@ -24,6 +26,7 @@ class TagsInStore(MethodView):
     @blp.alt_response(404, description="Store not found.")
     @blp.alt_response(409, description="Tag with name already exists in that store.")
     @blp.alt_response(500, description="Database error.")
+    @jwt_required()
     def post(self, new_tag, store_id):
         try:
             store = db.session.query(StoreModel).filter_by(id=store_id).first()
@@ -46,6 +49,7 @@ class LinkTagsToItem(MethodView):
     @blp.response(201, TagSchema(many=True))
     @blp.alt_response(404, description="Item or tag not found.")
     @blp.alt_response(500, description="Database error.")
+    @jwt_required()
     def post(self, item_id, tag_id):
         try:
             item = db.session.query(ItemModel).filter_by(id=item_id).first()
@@ -65,6 +69,7 @@ class LinkTagsToItem(MethodView):
     @blp.response(202, TagAndItemSchema)
     @blp.alt_response(404, description="Item or tag not found.")
     @blp.alt_response(500, description="Database error.")
+    @jwt_required()
     def delete(self, item_id, tag_id):
         try:
             item = db.session.query(ItemModel).filter_by(id=item_id).first()
@@ -85,6 +90,7 @@ class LinkTagsToItem(MethodView):
 class Tag(MethodView):
     @blp.response(200, TagSchema)
     @blp.alt_response(404, description="Tag not found.")
+    @jwt_required()
     def get(self, tag_id):
         tag = db.session.query(TagModel).filter_by(id=tag_id).first()
         if not tag:
@@ -94,6 +100,7 @@ class Tag(MethodView):
     @blp.response(202)
     @blp.alt_response(404, description="Tag not found.")
     @blp.alt_response(500, description="Database error.")
+    @jwt_required()
     def delete(self, tag_id):
         try:
             tag = db.session.query(TagModel).filter_by(id=tag_id).first()
