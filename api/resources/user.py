@@ -24,9 +24,6 @@ class UserRegister(MethodView):
     @blp.alt_response(409, description="Username already exists")
     @blp.alt_response(400, description="Missing username or password")
     def post(self, user_data):
-        if "username" not in user_data or "password" not in user_data:
-            abort(409, message="Missing username or password")
-
         # experimenting with namedtuples
         user_data = UserData(**user_data)
         if UserModel.query.filter_by(username=user_data.username).first():
@@ -42,6 +39,7 @@ class UserRegister(MethodView):
 
 @blp.route("/user/<int:user_id>")
 class User(MethodView):
+    @jwt_required()
     @blp.response(200, UserSchema)
     @blp.alt_response(404, description="User not found")
     def get(self, user_id):
@@ -65,9 +63,7 @@ class User(MethodView):
 class UserLogin(MethodView):
     @blp.arguments(UserSchema)
     def post(self, user_data):
-        user = UserModel.query.filter_by(
-            username=user_data["username"]
-        ).first()
+        user = db.session.query(UserModel).filter_by(username=user_data["username"]).first()
 
         if user and pbkdf2_sha256.verify(user_data["password"], user.password):
             access_token = create_access_token(identity=user.id, fresh=True)
@@ -86,7 +82,7 @@ class UserLogout(MethodView):
         BLOCKLIST.add(jti)
         return {"message": "Successfully logged out"}, 200
 
-@blp.route("/users")
+@blp.route("/refresh")
 class TokenRefresh(MethodView):
     @jwt_required(refresh=True)
     def post(self):

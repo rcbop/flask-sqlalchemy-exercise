@@ -4,6 +4,7 @@ import secrets
 from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
 from flask_smorest import Api
+from flask_migrate import Migrate
 
 from api.auth.blocklist import BLOCKLIST
 from api.db import db
@@ -28,7 +29,9 @@ def create_app(db_url: str | None = None, jwt_secret: str | None = None) -> Api:
         "DATABASE_URL", "sqlite:///data.db")
     app.config["JWT_SECRET_KEY"] = jwt_secret or os.getenv(
         "JWT_SECRET_KEY", secrets.SystemRandom().getrandbits(256))
+
     db.init_app(app)
+    Migrate(app, db)
 
     api = Api(app)
     jwt = JWTManager(app)
@@ -71,9 +74,6 @@ def create_app(db_url: str | None = None, jwt_secret: str | None = None) -> Api:
             "description": "The token has been revoked",
             "error": "token_revoked"
         }), 401
-
-    with app.app_context():
-        db.create_all()
 
     api.register_blueprint(ItemBlueprint)
     api.register_blueprint(StoreBlueprint)
