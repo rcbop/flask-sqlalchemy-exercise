@@ -1,10 +1,11 @@
 import os
 import secrets
 
+import requests
 from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
-from flask_smorest import Api
 from flask_migrate import Migrate
+from flask_smorest import Api
 
 from api.auth.blocklist import BLOCKLIST
 from api.db import db
@@ -15,6 +16,15 @@ from api.resources.user import blp as UserBlueprint
 
 
 def create_app(db_url: str | None = None, jwt_secret: str | None = None) -> Api:
+    """Create a Flask app and register the API.
+
+    Args:
+        db_url (str | None, optional): Database URL. Defaults to None.
+        jwt_secret (str | None, optional): JWT secret key. Defaults to None.
+
+    Returns:
+        Api: The API.
+    """
     app = Flask(__name__)
 
     app.config["PROPAGATE_EXCEPTIONS"] = True
@@ -25,10 +35,8 @@ def create_app(db_url: str | None = None, jwt_secret: str | None = None) -> Api:
     app.config["OPENAPI_SWAGGER_UI_PATH"] = "/swagger-ui"
     app.config["OPENAPI_SWAGGER_UI_URL"] = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["SQLALCHEMY_DATABASE_URI"] = db_url or os.getenv(
-        "DATABASE_URL", "sqlite:///data.db")
-    app.config["JWT_SECRET_KEY"] = jwt_secret or os.getenv(
-        "JWT_SECRET_KEY", secrets.SystemRandom().getrandbits(256))
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_url or os.getenv("DATABASE_URL", "sqlite:///data.db")
+    app.config["JWT_SECRET_KEY"] = jwt_secret or os.getenv("JWT_SECRET_KEY", secrets.SystemRandom().getrandbits(256))
 
     db.init_app(app)
     Migrate(app, db)

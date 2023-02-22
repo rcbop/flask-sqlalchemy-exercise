@@ -1,7 +1,6 @@
 import pytest
-import jwt
 from api.app import create_app
-from flask_jwt_extended import (create_access_token, create_refresh_token)
+from flask_jwt_extended import create_access_token
 from api.db import db
 
 TEST_JWT_KEY = "test_jwt_key"

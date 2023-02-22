@@ -1,19 +1,29 @@
-from api.models import UserModel
-from passlib.hash import pbkdf2_sha256
+from unittest.mock import MagicMock
+
 import pytest
+from passlib.hash import pbkdf2_sha256
+
+import api.resources.user
+from api.models import UserModel
+
+
+@pytest.fixture
+def email_fixture(mocker) -> MagicMock:
+    return mocker.patch("api.resources.user.EmailSender", MagicMock())
 
 @pytest.fixture
 def user_fixture(db_fixture):
     user = UserModel(
         username="test",
-        password=pbkdf2_sha256.hash("test"))
+        password=pbkdf2_sha256.hash("test"),
+        email="john@doe.com")
     db_fixture.session.add(user)
     db_fixture.session.commit()
     yield user
     db_fixture.session.query(UserModel).delete()
 
-def test_register_user(test_client, db_fixture):
-    user_data = {"username": "test", "password": "test"}
+def test_register_user(test_client, db_fixture, email_fixture):
+    user_data = {"username": "test", "password": "test", "email": "john@doe.com"}
     response = test_client.post("/register", json=user_data)
     assert response.status_code == 201
     assert response.json["message"] == "User registered!"
@@ -26,7 +36,7 @@ def test_register_user_invalid_request(test_client, db_fixture):
     assert response.status_code == 422
 
 def test_register_user_already_exists(test_client, user_fixture):
-    user_data = {"username": "test", "password": "test"}
+    user_data = {"username": "test", "password": "test", "email": "john@doe2.com"}
     response = test_client.post("/register", json=user_data)
     assert response.status_code == 409
     assert response.json["message"] == "Username already exists"
@@ -36,8 +46,8 @@ def test_get_user(test_client, user_fixture, auth_header):
     assert response.status_code == 200
     assert response.json["username"] == "test"
 
-def test_get_user_not_found(test_client, auth_header):
-    response = test_client.get("/user/1", headers=auth_header)
+def test_get_user_not_found(test_client, db_fixture, auth_header):
+    response = test_client.get("/user/99", headers=auth_header)
     assert response.status_code == 404
     assert response.json["message"] == "User not found"
 
@@ -65,7 +75,7 @@ def test_login_user_invalid_password(test_client, user_fixture):
     response = test_client.post("/login", json=user_data)
     assert response.status_code == 401
 
-def test_login_invalid_user(test_client, user_fixture):
+def test_login_invalid_user(test_client, db_fixture, user_fixture):
     user_data = {"username": "wrong", "password": "test"}
     response = test_client.post("/login", json=user_data)
     assert response.status_code == 401
