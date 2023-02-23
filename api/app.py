@@ -1,7 +1,6 @@
 import os
 import secrets
 
-import requests
 from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
@@ -13,6 +12,7 @@ from api.resources.item import blp as ItemBlueprint
 from api.resources.store import blp as StoreBlueprint
 from api.resources.tag import blp as TagBlueprint
 from api.resources.user import blp as UserBlueprint
+from api.resources.healthcheck import blp as HealthCheckBlueprint
 
 
 def create_app(db_url: str | None = None, jwt_secret: str | None = None) -> Api:
@@ -87,4 +87,5 @@ def create_app(db_url: str | None = None, jwt_secret: str | None = None) -> Api:
     api.register_blueprint(StoreBlueprint)
     api.register_blueprint(TagBlueprint)
     api.register_blueprint(UserBlueprint)
+    api.register_blueprint(HealthCheckBlueprint)
     return app

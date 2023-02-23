@@ -1,0 +1,28 @@
+version: '3.3'
+
+services:
+  db:
+    image: postgres:9.6
+    volumes:
+      - data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+
+  api:
+    build: .
+    command: gunicorn "api.app:create_app()" --bind 0.0.0.0:3000
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://test:test@db:5432/postgres
+    ports:
+      - "3000:3000"
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+volumes:
+  data:
