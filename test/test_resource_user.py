@@ -8,8 +8,8 @@ from api.models import UserModel
 
 
 @pytest.fixture
-def email_fixture(mocker) -> MagicMock:
-    return mocker.patch("api.resources.user.EmailSender", MagicMock())
+def queue_fixture(mocker) -> MagicMock:
+    return mocker.patch("api.resources.user.current_app.queue", MagicMock())
 
 @pytest.fixture
 def user_fixture(db_fixture):
@@ -22,7 +22,7 @@ def user_fixture(db_fixture):
     yield user
     db_fixture.session.query(UserModel).delete()
 
-def test_register_user(test_client, db_fixture, email_fixture):
+def test_register_user(test_client, db_fixture, queue_fixture):
     user_data = {"username": "test", "password": "test", "email": "john@doe.com"}
     response = test_client.post("/register", json=user_data)
     assert response.status_code == 201

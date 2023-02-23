@@ -1,15 +1,13 @@
 from unittest.mock import Mock, patch
-
-import api.resources.user
-from api.resources.user import EmailSender
+from api.resources.user import send_email_from_postmaster
 
 
-@patch("api.resources.user.requests.post")
-@patch("api.resources.user.MAILGUN_DOMAIN", "test")
-@patch("api.resources.user.MAILGUN_TOKEN", "test")
+@patch("api.email.requests.post")
+@patch("api.email.MAILGUN_DOMAIN", "test")
+@patch("api.email.MAILGUN_TOKEN", "test")
 def test_send_email_from_postmaster(request_post_mock: Mock):
     """Test that send_email_from_postmaster() returns a requests.Response."""
-    response = EmailSender.send_email_from_postmaster(
+    response = send_email_from_postmaster(
         mail_to="john@doe.com",
         subject="Test",
         body="Test")

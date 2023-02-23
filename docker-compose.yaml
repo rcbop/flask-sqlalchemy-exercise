@@ -1,5 +1,9 @@
 version: '3.3'
 
+x-env: &env
+  DATABASE_URL: postgresql+psycopg2://test:test@db:5432/postgres
+  REDIS_URL: redis://redis:6379/0
+
 services:
   db:
     image: postgres:9.6
@@ -12,17 +16,25 @@ services:
     ports:
       - "5432:5432"
 
-  api:
-    build: .
-    command: gunicorn "api.app:create_app()" --bind 0.0.0.0:3000
-    environment:
-      - DATABASE_URL=postgresql+psycopg2://test:test@db:5432/postgres
-    ports:
-      - "3000:3000"
 
   redis:
     image: redis:alpine
     ports:
       - "6379:6379"
+
+  api:
+    build: .
+    command: gunicorn "api.app:create_app()" --bind 0.0.0.0:3000
+    environment:
+      <<: *env
+    ports:
+      - "3000:3000"
+
+  worker:
+    build: .
+    command: rq worker -u $REDIS_URL emails
+    environment:
+      <<: *env
+
 volumes:
   data:
