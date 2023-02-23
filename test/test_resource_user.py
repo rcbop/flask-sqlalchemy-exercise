@@ -30,6 +30,14 @@ def test_register_user(test_client, db_fixture, queue_fixture):
     assert db_fixture.session.query(UserModel).count() == 1
     db_fixture.session.query(UserModel).delete()
 
+def test_register_user_with_error(test_client, db_fixture, queue_fixture):
+    user_data = {"username": "test", "password": "test", "email": "john@doe.com"}
+    queue_fixture.enqueue.side_effect = Exception("test error")
+    response = test_client.post("/register", json=user_data)
+    assert response.status_code == 500
+    assert response.json["message"] == "Internal server error"
+    db_fixture.session.query(UserModel).delete()
+
 def test_register_user_invalid_request(test_client, db_fixture):
     user_data = {"username": "test"}
     response = test_client.post("/register", json=user_data)

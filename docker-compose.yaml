@@ -3,6 +3,8 @@ version: '3.3'
 x-env: &env
   DATABASE_URL: postgresql+psycopg2://test:test@db:5432/postgres
   REDIS_URL: redis://redis:6379/0
+  MAILGUN_DOMAIN: ${MAILGUN_DOMAIN}
+  MAILGUN_TOKEN: ${MAILGUN_TOKEN}
 
 services:
   db:
@@ -16,11 +18,21 @@ services:
     ports:
       - "5432:5432"
 
-
   redis:
     image: redis:alpine
     ports:
       - "6379:6379"
+
+  migrate:
+    build: .
+    command: sh -c 'until pg_isready -h db; do sleep 1; done && flask db upgrade'
+    working_dir: /app/api
+    environment:
+      <<: *env
+    volumes:
+      - ./api/migrations:/app/api/migrations
+    depends_on:
+      - db
 
   api:
     build: .
@@ -29,12 +41,18 @@ services:
       <<: *env
     ports:
       - "3000:3000"
+    depends_on:
+      - migrate
+      - redis
 
   worker:
     build: .
-    command: rq worker -u $REDIS_URL emails
+    command: rq worker -u redis://redis:6379/0 emails
     environment:
       <<: *env
+    depends_on:
+      - redis
+      - migrate
 
 volumes:
   data:

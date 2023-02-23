@@ -25,7 +25,6 @@ class UserRegister(MethodView):
     @blp.arguments(UserRegisterSchema)
     @blp.response(201)
     @blp.alt_response(409, description="Username already exists")
-    @blp.alt_response(400, description="Missing username or password")
     def post(self, user_data):
         # experimenting with namedtuples
         user_data = UserData(**user_data)
@@ -36,21 +35,24 @@ class UserRegister(MethodView):
                 )
             ).first():
             abort(409, message="Username already exists")
-        user = UserModel(
-            username=user_data.username,
-            password=pbkdf2_sha256.hash(user_data.password),
-            email=user_data.email
-        )
-        db.session.add(user)
-        db.session.commit()
 
-        current_app.queue.enqueue(
-            send_email_from_postmaster,
-            mail_to=user_data.username,
-            subject="Successful registration",
-            body=f"Welcome {user.username}! You have successfully registered to our Stores API."
-        )
+        try:
+            user = UserModel(
+                username=user_data.username,
+                password=pbkdf2_sha256.hash(user_data.password),
+                email=user_data.email
+            )
+            db.session.add(user)
+            db.session.commit()
 
+            current_app.queue.enqueue(
+                send_email_from_postmaster,
+                mail_to=user_data.username,
+                subject="Successful registration",
+                body=f"Welcome {user.username}! You have successfully registered to our Stores API."
+            )
+        except:
+            abort(500, message="Internal server error")
         return {"message": "User registered!"}, 201
 
 
