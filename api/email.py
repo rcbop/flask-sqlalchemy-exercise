@@ -1,45 +1,38 @@
 import os
 import requests
+import jinja2
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+template_loader = jinja2.FileSystemLoader(searchpath="templates")
+template_env = jinja2.Environment(loader=template_loader)
+
+def render_template(template_name: str, **kwargs) -> str:
+    """Render a template.
+
+    Args:
+        template_name (str): The name of the template to render.
+
+    Returns:
+        str: The rendered template.
+    """
+    template = template_env.get_template(template_name)
+    return template.render(**kwargs)
 
 MAILGUN_DOMAIN = os.getenv("MAILGUN_DOMAIN")
 MAILGUN_TOKEN = os.getenv("MAILGUN_TOKEN")
 
-def send_email_from_postmaster(subject: str, body: str, mail_to: str) -> requests.Response:
-    """Send an email using Mailgun.
-
-    Args:
-        subject (str): The subject of the email.
-        body (str): The body of the email.
-        mail_to (str): The recipient of the email.
-
-    Raises:
-        ValueError: If MAILGUN_DOMAIN or MAILGUN_TOKEN are not set.
-
-    Returns:
-        requests.Response: The response from Mailgun.
-    """
+def send_email_from_postmaster(email:str, username: str) -> requests.Response:
     return send_email(
-        subject=subject,
-        body=body,
-        mail_from=f"Mailgun <postmaster@{MAILGUN_DOMAIN}.mailgun.org>",
-        mail_to=mail_to)
+        subject=f"Welcome {username}! You have successfully registered to our Stores API.",
+        body="Successfully created a new user.",
+        mail_from=f"Rcbop <postmaster@{MAILGUN_DOMAIN}.mailgun.org>",
+        mail_to=email,
+        html=render_template("email/welcome.html", username=username))
 
-@staticmethod
-def send_email(subject: str, body: str, mail_from: str, mail_to: str) -> requests.Response:
-    """Send an email using Mailgun.
-
-    Args:
-        subject (str): The subject of the email.
-        body (str): The body of the email.
-        mail_from (str): The sender of the email.
-        mail_to (str): The recipient of the email.
-
-    Raises:
-        ValueError: If MAILGUN_DOMAIN or MAILGUN_TOKEN are not set.
-
-    Returns:
-        requests.Response: The response from Mailgun.
-    """
+def send_email(subject: str, body: str, mail_from: str, mail_to: str, html) -> requests.Response:
     if MAILGUN_DOMAIN is None or MAILGUN_TOKEN is None:
         raise ValueError("MAILGUN_DOMAIN and MAILGUN_TOKEN must be set")
 
@@ -48,7 +41,8 @@ def send_email(subject: str, body: str, mail_from: str, mail_to: str) -> request
         auth=("api", MAILGUN_TOKEN),
         data={
             "from": mail_from,
-            "to": mail_to,
+            "to": [mail_to],
             "subject": subject,
-            "text": body
+            "text": body,
+            "html": html
         })

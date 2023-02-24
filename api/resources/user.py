@@ -47,9 +47,8 @@ class UserRegister(MethodView):
 
             current_app.queue.enqueue(
                 send_email_from_postmaster,
-                mail_to=user_data.username,
-                subject="Successful registration",
-                body=f"Welcome {user.username}! You have successfully registered to our Stores API."
+                email=user_data.email,
+                username=user_data.username
             )
         except:
             abort(500, message="Internal server error")
