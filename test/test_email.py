@@ -1,5 +1,14 @@
 from unittest.mock import Mock, patch
-from api.email import send_email_from_postmaster, render_template
+
+import pytest
+
+from api.email import render_template, send_email_from_postmaster
+
+
+def test_send_email_from_postmaster_without_mailgun_cfg():
+    """Test that send_email_from_postmaster() returns a requests.Response."""
+    with pytest.raises(ValueError):
+        send_email_from_postmaster(email="john@doe.com", username="john")
 
 @patch("api.email.requests.post")
 @patch("api.email.MAILGUN_DOMAIN", "test")
@@ -20,4 +29,5 @@ def test_send_email_from_postmaster(request_post_mock: Mock):
             "subject": f"Welcome {username}! You have successfully registered to our Stores API.",
             "text": "Successfully created a new user.",
             "html": render_template("email/welcome.html", username=username)
-        })
+        },
+        timeout=5)

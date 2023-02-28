@@ -1,7 +1,9 @@
+""" Flask app and API registration. """
 import os
 import secrets
-import redis
 
+import redis
+from dotenv import load_dotenv
 from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
@@ -10,11 +12,11 @@ from rq import Queue
 
 from api.auth.blocklist import BLOCKLIST
 from api.db import db
+from api.resources.healthcheck import blp as HealthCheckBlueprint
 from api.resources.item import blp as ItemBlueprint
 from api.resources.store import blp as StoreBlueprint
 from api.resources.tag import blp as TagBlueprint
 from api.resources.user import blp as UserBlueprint
-from api.resources.healthcheck import blp as HealthCheckBlueprint
 
 
 def create_app(db_url: str | None = None, jwt_secret: str | None = None) -> Api:
@@ -41,7 +43,8 @@ def create_app(db_url: str | None = None, jwt_secret: str | None = None) -> Api:
     app.config["OPENAPI_SWAGGER_UI_URL"] = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url or os.getenv("DATABASE_URL", "sqlite:///data.db")
-    app.config["JWT_SECRET_KEY"] = jwt_secret or os.getenv("JWT_SECRET_KEY", str(secrets.SystemRandom().getrandbits(256)))
+    app.config["JWT_SECRET_KEY"] = jwt_secret or \
+        os.getenv("JWT_SECRET_KEY", str(secrets.SystemRandom().getrandbits(256)))
 
     db.init_app(app)
     Migrate(app, db)
@@ -93,4 +96,10 @@ def create_app(db_url: str | None = None, jwt_secret: str | None = None) -> Api:
     api.register_blueprint(TagBlueprint)
     api.register_blueprint(UserBlueprint)
     api.register_blueprint(HealthCheckBlueprint)
+
     return app
+
+if __name__ == "__main__":
+    load_dotenv()
+    app = create_app()
+    app.run(debug=True)
