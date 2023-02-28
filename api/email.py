@@ -1,10 +1,12 @@
 """send email module"""
 import os
-import requests
+
 import jinja2
+import requests
 
 template_loader = jinja2.FileSystemLoader(searchpath="templates")
 template_env = jinja2.Environment(loader=template_loader, autoescape=True)
+
 
 def render_template(template_name: str, **kwargs) -> str:
     """Render a template.
@@ -18,10 +20,12 @@ def render_template(template_name: str, **kwargs) -> str:
     template = template_env.get_template(template_name)
     return template.render(**kwargs)
 
+
 MAILGUN_DOMAIN = os.getenv("MAILGUN_DOMAIN")
 MAILGUN_TOKEN = os.getenv("MAILGUN_TOKEN")
 
-def send_email_from_postmaster(email:str, username: str) -> requests.Response:
+
+def send_email_from_postmaster(email: str, username: str) -> requests.Response:
     """Send an email from postmaster.
 
     Args:
@@ -36,10 +40,13 @@ def send_email_from_postmaster(email:str, username: str) -> requests.Response:
         body="Successfully created a new user.",
         mail_from=f"Rcbop <postmaster@{MAILGUN_DOMAIN}.mailgun.org>",
         mail_to=email,
-        html=render_template("email/welcome.html", username=username))
+        html=render_template("email/welcome.html", username=username),
+    )
 
-def send_email(subject: str, body: str, mail_from: str, mail_to: str,
-               html: str) -> requests.Response:
+
+def send_email(
+    subject: str, body: str, mail_from: str, mail_to: str, html: str
+) -> requests.Response:
     """Send an email using mailgun.
 
     Args:
@@ -66,5 +73,7 @@ def send_email(subject: str, body: str, mail_from: str, mail_to: str,
             "to": [mail_to],
             "subject": subject,
             "text": body,
-            "html": html
-        }, timeout=5)
+            "html": html,
+        },
+        timeout=5,
+    )

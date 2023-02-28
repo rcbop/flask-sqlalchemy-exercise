@@ -1,18 +1,20 @@
 """ tag resource """
 from flask.views import MethodView
-from flask_smorest import Blueprint, abort
 from flask_jwt_extended import jwt_required
+from flask_smorest import Blueprint, abort
 from sqlalchemy.exc import SQLAlchemyError
 
 from api.db import db
-from api.models import TagModel, StoreModel, ItemModel
-from api.schemas import TagSchema, TagAndItemSchema
+from api.models import ItemModel, StoreModel, TagModel
+from api.schemas import TagAndItemSchema, TagSchema
 
-blp = Blueprint('Tags', 'tags', description='Operations on tags')
+blp = Blueprint("Tags", "tags", description="Operations on tags")
+
 
 @blp.route("/stores/<int:store_id>/tag")
 class TagsInStore(MethodView):
-    """ Tags in store resource """
+    """Tags in store resource"""
+
     @blp.response(200, TagSchema(many=True))
     @blp.alt_response(404, description="Store not found.")
     @jwt_required()
@@ -49,11 +51,15 @@ class TagsInStore(MethodView):
         """
         try:
             store = db.session.query(StoreModel).filter_by(id=store_id).first()
-            if 'name' not in new_tag:
+            if "name" not in new_tag:
                 abort(400, message="Tag name is required.")
             if not store:
                 abort(404, message="Store not found.")
-            if db.session.query(TagModel).filter_by(name=new_tag['name'], store_id=store_id).first():
+            if (
+                db.session.query(TagModel)
+                .filter_by(name=new_tag["name"], store_id=store_id)
+                .first()
+            ):
                 abort(409, message="Tag with name already exists in that store.")
             tag = TagModel(**new_tag, store_id=store_id)
             db.session.add(tag)
@@ -63,9 +69,11 @@ class TagsInStore(MethodView):
             abort(500, message=f"Database error: {err}")
         return tag, 201
 
+
 @blp.route("/item/<string:item_id>/tag/<string:tag_id>")
 class LinkTagsToItem(MethodView):
-    """ Link tags to item resource """
+    """Link tags to item resource"""
+
     @blp.response(201, TagSchema(many=True))
     @blp.alt_response(404, description="Item or tag not found.")
     @blp.alt_response(500, description="Database error.")
@@ -122,11 +130,13 @@ class LinkTagsToItem(MethodView):
         except SQLAlchemyError as e:
             db.session.rollback()
             abort(500, message="Database error: {}".format(e))
-        return { "message": "Tag unlinked" }, 202
+        return {"message": "Tag unlinked"}, 202
+
 
 @blp.route("/tag/<string:tag_id>")
 class Tag(MethodView):
-    """ Tag resource """
+    """Tag resource"""
+
     @blp.response(200, TagSchema)
     @blp.alt_response(404, description="Tag not found.")
     @jwt_required()
@@ -166,4 +176,4 @@ class Tag(MethodView):
         except SQLAlchemyError as err:
             db.session.rollback()
             abort(500, message="Database error: {}".format(err))
-        return { "message": "Tag deleted" }, 202
+        return {"message": "Tag deleted"}, 202

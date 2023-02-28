@@ -2,8 +2,10 @@
 from api.db import db
 from api.models.types import Item
 
-class ItemModel(db.Model): # type: ignore
+
+class ItemModel(db.Model):  # type: ignore
     """Item model class."""
+
     __tablename__ = "items"
 
     id = db.Column(db.Integer, primary_key=True)

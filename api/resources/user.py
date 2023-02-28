@@ -3,27 +3,33 @@ from collections import namedtuple
 
 from flask import current_app
 from flask.views import MethodView
-from flask_jwt_extended import (create_access_token, create_refresh_token,
-                                get_jwt, get_jwt_identity, jwt_required)
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    get_jwt,
+    get_jwt_identity,
+    jwt_required,
+)
 from flask_smorest import Blueprint, abort
 from passlib.hash import pbkdf2_sha256
 from sqlalchemy import or_
 
 from api.auth.blocklist import BLOCKLIST
 from api.db import db
+from api.email import send_email_from_postmaster
 from api.models import UserModel
 from api.schemas import UserRegisterSchema, UserSchema
-from api.email import send_email_from_postmaster
 
 blp = Blueprint("Users", "users", description="Operations on users")
 
 # trying with namedtuples
-UserData = namedtuple('UserData', ['username', 'password', 'email'])
+UserData = namedtuple("UserData", ["username", "password", "email"])
 
 
 @blp.route("/register")
 class UserRegister(MethodView):
-    """ User registration resource """
+    """User registration resource"""
+
     @blp.arguments(UserRegisterSchema)
     @blp.response(201)
     @blp.alt_response(409, description="Username already exists")
@@ -37,37 +43,42 @@ class UserRegister(MethodView):
             tuple[dict, int]: response message and status code
         """
         # experimenting with namedtuples
-        user_data = UserData(**user_data)
-        if db.session.query(UserModel).filter(
+        user_data = UserData(**user_data)  # type: ignore
+        if (
+            db.session.query(UserModel)
+            .filter(
                 or_(
-                    UserModel.username == user_data.username,
-                    UserModel.email == user_data.email
+                    UserModel.username == user_data.username,  # type: ignore
+                    UserModel.email == user_data.email,  # type: ignore
                 )
-            ).first():
+            )
+            .first()
+        ):
             abort(409, message="Username already exists")
 
         try:
             user = UserModel(
-                username=user_data.username,
-                password=pbkdf2_sha256.hash(user_data.password),
-                email=user_data.email
+                username=user_data.username,  # type: ignore
+                password=pbkdf2_sha256.hash(user_data.password),  # type: ignore
+                email=user_data.email,  # type: ignore
             )
             db.session.add(user)
             db.session.commit()
 
-            current_app.queue.enqueue(
+            current_app.queue.enqueue(  # type: ignore
                 send_email_from_postmaster,
-                email=user_data.email,
-                username=user_data.username
+                email=user_data.email,  # type: ignore
+                username=user_data.username,  # type: ignore
             )
-        except Exception: # pylint: disable=broad-except
+        except Exception:  # pylint: disable=broad-except
             abort(500, message="Internal server error")
         return {"message": "User registered!"}, 201
 
 
 @blp.route("/user/<int:user_id>")
 class User(MethodView):
-    """ User resource """
+    """User resource"""
+
     @jwt_required()
     @blp.response(200, UserSchema)
     @blp.alt_response(404, description="User not found")
@@ -104,9 +115,11 @@ class User(MethodView):
         db.session.commit()
         return {"message": "User deleted!"}, 202
 
+
 @blp.route("/login")
 class UserLogin(MethodView):
-    """ User login resource """
+    """User login resource"""
+
     @blp.arguments(UserSchema)
     def post(self, user_data: dict) -> tuple[dict, int]:
         """Login a user
@@ -117,20 +130,23 @@ class UserLogin(MethodView):
         Returns:
             tuple[dict, int]: response message and status code
         """
-        user = db.session.query(UserModel).filter_by(username=user_data["username"]).first()
+        user = (
+            db.session.query(UserModel)
+            .filter_by(username=user_data["username"])
+            .first()
+        )
 
         if user and pbkdf2_sha256.verify(user_data["password"], user.password):
             access_token = create_access_token(identity=user.id, fresh=True)
             refresh_token = create_refresh_token(user.id)
-            return {
-                "access_token": access_token,
-                "refresh_token": refresh_token
-            }, 200
+            return {"access_token": access_token, "refresh_token": refresh_token}, 200
         return {"message": "Invalid credentials"}, 401
+
 
 @blp.route("/logout")
 class UserLogout(MethodView):
-    """ User logout resource """
+    """User logout resource"""
+
     @jwt_required()
     def post(self) -> tuple[dict, int]:
         """Logout a user
@@ -142,9 +158,11 @@ class UserLogout(MethodView):
         BLOCKLIST.add(jti)
         return {"message": "Successfully logged out"}, 200
 
+
 @blp.route("/refresh")
 class TokenRefresh(MethodView):
-    """ Token refresh resource """
+    """Token refresh resource"""
+
     @jwt_required(refresh=True)
     def post(self) -> tuple[dict, int]:
         """Refresh a user's access token

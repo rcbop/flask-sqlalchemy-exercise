@@ -6,13 +6,17 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from api.db import db
 
-blp = Blueprint("healthcheck", "healthcheck", description="Check connections to database")
+blp = Blueprint(
+    "healthcheck", "healthcheck", description="Check connections to database"
+)
+
 
 @blp.route("/healthcheck")
 class HealthCheck(MethodView):
-    """ Healthcheck resource """
+    """Healthcheck resource"""
+
     def get(self) -> tuple[dict, int]:
-        """ Check if database is up """
+        """Check if database is up"""
         try:
             query = text("SELECT 1")
             db.session.execute(query)

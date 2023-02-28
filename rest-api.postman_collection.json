@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "4e9e56af-5b06-4dd5-a8c9-20c6e0ea2f28",
-		"name": "ARAC-Section01",
+		"_postman_id": "78983609-46a2-4bbb-9c84-8426e79ba0ca",
+		"name": "rest-api",
 		"description": "This collection contains the requests for the section 01 code of the Advanced REST API Course.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -21,7 +21,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"username\": \"jose\",\n\t\"password\": \"1234\"\n}"
+							"raw": "{\n\t\"username\": \"john\",\n    \"email\": \"john.doe@corp.com\",\n\t\"password\": \"test1234\"\n}"
 						},
 						"url": {
 							"raw": "{{url}}/register",
@@ -41,8 +41,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "8c0c0ed6-c206-4c88-9349-429e024e312b",
-								"type": "text/javascript",
 								"exec": [
 									"var jsonData = pm.response.json();",
 									"pm.test(\"access_token not empty\", function () {",
@@ -64,7 +62,8 @@
 									"} else {",
 									"    postman.setEnvironmentVariable(\"refresh_token\", null);",
 									"}"
-								]
+								],
+								"type": "text/javascript"
 							}
 						}
 					],
@@ -78,7 +77,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"username\" : \"jose\",\n  \"password\" : \"1234\"\n}"
+							"raw": "{\n  \"username\" : \"john\",\n  \"password\" : \"1234\"\n}"
 						},
 						"url": {
 							"raw": "{{url}}/login",
@@ -98,7 +97,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "dc763e9b-e6c7-4ff3-9766-637976a5c64b",
 								"type": "text/javascript",
 								"exec": [
 									""
@@ -136,7 +134,6 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "ad818ea6-8f79-436e-b756-ad878666ae9e",
 								"type": "text/javascript",
 								"exec": [
 									"var jsonData = pm.response.json();",
@@ -182,14 +179,10 @@
 					"response": []
 				},
 				{
-					"name": "get user by id",
+					"name": "get user/<id>",
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"username\": \"jose\",\n\t\"password\": \"1234\"\n}"
-						},
 						"url": {
 							"raw": "{{url}}/user/1",
 							"host": [
@@ -204,13 +197,13 @@
 					"response": []
 				},
 				{
-					"name": "delete user by id",
+					"name": "delete user/<id>",
 					"request": {
 						"method": "DELETE",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"username\": \"jose\",\n\t\"password\": \"1234\"\n}"
+							"raw": "{\n\t\"username\": \"john\",\n\t\"password\": \"1234\"\n}"
 						},
 						"url": {
 							"raw": "{{url}}/user/2",
@@ -231,29 +224,28 @@
 			"name": "items",
 			"item": [
 				{
-					"name": "get item/name",
+					"name": "get item/<id>",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
-							"raw": "{{url}}/item/chair",
+							"raw": "{{url}}/item/1",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"item",
-								"chair"
+								"1"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "post item/name",
+					"name": "post item/<id>",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -271,20 +263,20 @@
 							"raw": "{\n  \"price\": 12.99,\n  \"store_id\": 1\n}"
 						},
 						"url": {
-							"raw": "{{url}}/item/chair",
+							"raw": "{{url}}/item/1",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"item",
-								"chair"
+								"1"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "put item/name",
+					"name": "put item/<id>",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -298,20 +290,20 @@
 							"raw": "{\n  \"price\": 20.99,\n  \"store_id\": 1\n}"
 						},
 						"url": {
-							"raw": "{{url}}/item/chair",
+							"raw": "{{url}}/item/1",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"item",
-								"chair"
+								"1"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "delete item by name",
+					"name": "delete item/<id>",
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -329,13 +321,13 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/item/chair",
+							"raw": "{{url}}/item/1",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"item",
-								"chair"
+								"1"
 							]
 						}
 					},
@@ -346,10 +338,6 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"username\" : \"cristiano\",\n  \"password\" : \"12345678\"\n}"
-						},
 						"url": {
 							"raw": "{{url}}/items",
 							"host": [
@@ -390,29 +378,25 @@
 					"response": []
 				},
 				{
-					"name": "get store by name",
+					"name": "get store/<id>",
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
-							"raw": "{{url}}/store/My Wonderful Store",
+							"raw": "{{url}}/store/1",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"store",
-								"My Wonderful Store"
+								"1"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "delete a new store by name",
+					"name": "delete store/<id>",
 					"request": {
 						"method": "DELETE",
 						"header": [],
@@ -421,13 +405,13 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "{{url}}/store/My Wonderful Store",
+							"raw": "{{url}}/store/1",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
 								"store",
-								"My Wonderful Store"
+								"1"
 							]
 						}
 					},
@@ -438,10 +422,6 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": ""
-						},
 						"url": {
 							"raw": "{{url}}/stores",
 							"host": [

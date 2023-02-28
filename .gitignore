@@ -1,6 +1,7 @@
 __pycache__
 .coverage
+.env
+.mypy_cache
 .pytest_cache
 *.db
 coverage.xml
-.env

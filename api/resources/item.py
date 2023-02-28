@@ -14,6 +14,7 @@ blp = Blueprint("Items", "items", description="Operations on items")
 @blp.route("/item/<string:item_id>")
 class Item(MethodView):
     """Item resource."""
+
     @blp.response(200, ItemSchema)
     @blp.alt_response(404, description="Item not found.")
     @jwt_required()
@@ -89,7 +90,8 @@ class Item(MethodView):
 
 @blp.route("/item")
 class ItemList(MethodView):
-    """ ItemList resource. """
+    """ItemList resource."""
+
     @blp.response(200, ItemSchema(many=True))
     @jwt_required()
     def get(self) -> tuple[list[ItemModel], int]:

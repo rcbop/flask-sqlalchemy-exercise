@@ -3,9 +3,11 @@
 from api.db import db
 from api.models.types import User
 
-class UserModel(db.Model): # type: ignore
-    """ User model class. """
-    __tablename__ = 'users'
+
+class UserModel(db.Model):  # type: ignore
+    """User model class."""
+
+    __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -19,8 +21,8 @@ class UserModel(db.Model): # type: ignore
             User: User dictionary.
         """
         return {
-            'id': self.id,
-            'username': self.username,
-            'password': self.password,
-            'email': self.email
+            "id": self.id,
+            "username": self.username,
+            "password": self.password,
+            "email": self.email,
         }

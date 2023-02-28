@@ -1,20 +1,20 @@
 """ Store resource """
 from flask.views import MethodView
-from flask_smorest import Blueprint, abort
 from flask_jwt_extended import jwt_required
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from flask_smorest import Blueprint, abort
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from api.db import db
 from api.models import StoreModel
 from api.schemas import StoreSchema
-
 
 blp = Blueprint("Stores", "stores", description="Operations on stores")
 
 
 @blp.route("/store/<string:store_id>")
 class Store(MethodView):
-    """ Store resource """
+    """Store resource"""
+
     @blp.response(200, StoreSchema)
     @blp.alt_response(404, description="Store not found.")
     @jwt_required()
@@ -54,7 +54,8 @@ class Store(MethodView):
 
 @blp.route("/store")
 class StoreList(MethodView):
-    """ Store list resource """
+    """Store list resource"""
+
     @blp.response(200, StoreSchema(many=True))
     @jwt_required()
     def get(self) -> tuple[list[dict], int]:
@@ -82,7 +83,7 @@ class StoreList(MethodView):
         """
         try:
             store = StoreModel(**store_data)
-            if 'name' not in store_data:
+            if "name" not in store_data:
                 abort(400, message="Store must have a name.")
             db.session.add(store)
             db.session.commit()
