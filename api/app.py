@@ -121,8 +121,3 @@ def create_app(db_url: str | None = None, jwt_secret: str | None = None) -> Api:
 
     return app
 
-
-if __name__ == "__main__":
-    load_dotenv()
-    app = create_app()
-    app.run(debug=True)
