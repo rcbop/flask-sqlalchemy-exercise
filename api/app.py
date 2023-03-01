@@ -120,4 +120,3 @@ def create_app(db_url: str | None = None, jwt_secret: str | None = None) -> Api:
     api.register_blueprint(HealthCheckBlueprint)
 
     return app
-
